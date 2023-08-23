@@ -53,13 +53,8 @@ Follow these steps to clone and set up the project:
 
 6. Configure your database in the `.env` file.
 
-7. Run database migrations:
 
-   ```shell
-   php artisan migrate
-   ```
-
-8. Start the Laravel development server:
+7. Start the Laravel development server:
 
    ```shell
    php artisan serve

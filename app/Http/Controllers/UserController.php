@@ -60,7 +60,7 @@ class UserController extends Controller
                     return strcasecmp($user['currency'], $currency) === 0;
                 });
             }
-            return response()->json(['data' => array_values($combinedData)], 200);
+            return response()->json(array_values($combinedData), 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'An error occurred'], 500);
         }
@@ -93,7 +93,9 @@ class UserController extends Controller
 
             // Map keys based on the configuration
             array_walk($item, function ($value, $sourceKey) use ($mapping, &$standardizedItem) {
-                if (isset($mapping[$sourceKey])) {
+                if ($sourceKey === 'status' && isset($mapping['status_mapping'][$value])) {
+                    $standardizedItem[$mapping['status']] = $mapping['status_mapping'][$value];
+                } elseif (isset($mapping[$sourceKey])) {
                     $standardizedItem[$mapping[$sourceKey]] = $value;
                 }
             });
@@ -106,5 +108,4 @@ class UserController extends Controller
 
         return $standardizedData;
     }
-
 }
