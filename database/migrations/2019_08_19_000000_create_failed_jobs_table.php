@@ -11,6 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (app()->runningUnitTests()) {
+            return ;
+        }
         Schema::create('failed_jobs', function (Blueprint $table) {
             $table->id();
             $table->string('uuid')->unique();
@@ -27,6 +30,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (app()->runningUnitTests()) {
+            return ;
+        }
         Schema::dropIfExists('failed_jobs');
     }
 };
