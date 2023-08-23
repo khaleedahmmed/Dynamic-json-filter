@@ -8,18 +8,18 @@
 
 ## Introduction
 
-Dynamic JSON Filter is a Laravel-based API project that allows you to filter and combine data from multiple JSON sources. This project is designed to provide a flexible way to filter and retrieve JSON data from various providers.
+Dynamic JSON Filter is a Laravel-based API project that enables you to filter and combine data from multiple JSON sources. This project offers a flexible way to filter and retrieve JSON data from various providers.
 
 ## Features
 
 - Combines and filters data from multiple JSON sources.
 - Supports filtering by provider, status code, balance, and currency.
-- Uses a configuration file for key mapping, making it easy to adapt to different data structures.
-- Includes unit tests for ensuring code correctness.
+- Utilizes a configuration file for key mapping, facilitating adaptation to different data structures.
+- Includes unit tests to ensure code correctness.
 
 ## Installation
 
-Follow these steps to clone and set up the project:
+To get started with this project, follow these steps:
 
 1. Clone the repository:
 
@@ -54,14 +54,14 @@ Follow these steps to clone and set up the project:
 6. Start the Laravel development server:
 
    ```shell
-   php artisan serve
+   php artisan serve --host=0.0.0.0
    ```
+
+   Access the application at `http://localhost:8000`.
 
 ## Usage
 
-1. Start the Laravel development server as described above.
-
-2. Make API requests to the `/api/v1/users` endpoint to filter and retrieve JSON data. You can use query parameters to specify filters, such as `provider`, `statusCode`, `balanceMin`, `balanceMax`, and `currency`.
+1. With the Laravel development server running, make API requests to the `/api/v1/users` endpoint to filter and retrieve JSON data. You can use query parameters to specify filters, such as `provider`, `statusCode`, `balanceMin`, `balanceMax`, and `currency`.
 
    Example request:
 
@@ -73,7 +73,7 @@ Follow these steps to clone and set up the project:
 
 ## Configuration
 
-- The key mapping for each data provider is defined in the `config/keys_mapping.php` file. You can customize this file to match the structure of your JSON data sources.
+- Customize the key mapping for each data provider in the `config/keys_mapping.php` file. Adjust this file to match the structure of your JSON data sources.
 
 ## Testing
 
@@ -83,10 +83,34 @@ To run unit tests, use the following command:
 php artisan test
 ```
 
-## Contributing
+## Docker Support
 
-Feel free to contribute to this project by submitting issues or pull requests. Your feedback and contributions are highly appreciated!
+This project includes Docker support for containerization. You can use the provided `Dockerfile` and `docker-compose.yml` files to set up and run the project in a Docker container.
+
+### Building and Running with Docker
+
+1. Clone the repository as mentioned above.
+
+2. Navigate to the project directory:
+
+   ```shell
+   cd Dynamic-json-filter
+   ```
+
+3. Build and start the Docker containers:
+
+   ```shell
+   docker-compose up -d
+   ```
+
+4. Access the application at `http://localhost:8000` in your web browser.
+
+5. When done, stop the containers:
+
+   ```shell
+   docker-compose down
+   ```
 
 ## License
 
-This project is open-source and available under the [MIT License](LICENSE).
+This project is available under the [MIT License](LICENSE).
