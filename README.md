@@ -51,10 +51,7 @@ Follow these steps to clone and set up the project:
    php artisan key:generate
    ```
 
-6. Configure your database in the `.env` file.
-
-
-7. Start the Laravel development server:
+6. Start the Laravel development server:
 
    ```shell
    php artisan serve

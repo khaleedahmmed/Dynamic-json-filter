@@ -2,6 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\FilterPipeline;
+use App\Filters\BalanceMaxFilter;
+use App\Filters\BalanceMinFilter;
+use App\Filters\CurrencyFilter;
+use App\Filters\ProviderFilter;
+use App\Filters\StatusCodeFilter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -10,74 +16,40 @@ class UserController extends Controller
     public function index(Request $request)
     {
         try {
-            // Get a list of JSON files in the data directory
-            $jsonFiles = Storage::disk('local')->files('json_data');
-
-            // The combined data
-            $combinedData = [];
-
-            foreach ($jsonFiles as $jsonFile) {
-                $source = pathinfo($jsonFile, PATHINFO_FILENAME);
-
-                $jsonData = $this->standardizeJson($source, json_decode(Storage::disk('local')->get($jsonFile), true));
-
-                foreach ($jsonData as $user) {
-                    $user['source'] = $source;
-                    $combinedData[] = $user;
-                }
-            }
+            // Get Files
+            $combinedData = $this->getCombinedData();
 
             // Apply filters
-            if ($request->has('provider')) {
-                $combinedData = array_filter($combinedData, function ($user) use ($request) {
-                    $provider = $request->input('provider');
-                    return $user['source'] === $provider;
-                });
-            }
+            $filteredData = $this->applyFilters($request, $combinedData);
 
-            if ($request->has('statusCode')) {
-                $statusCode = $this->getStatusCode($request->input('statusCode'));
-                $combinedData = array_filter($combinedData, function ($user) use ($statusCode) {
-                    return $user['status'] === $statusCode;
-                });
-            }
+            // Return Response
+            return response()->json(array_values($filteredData), 200);
 
-            if ($request->has('balanceMin')) {
-                $combinedData = array_filter($combinedData, function ($user) use ($request) {
-                    return $user['balance'] >= $request->input('balanceMin');
-                });
-            }
-
-            if ($request->has('balanceMax')) {
-                $combinedData = array_filter($combinedData, function ($user) use ($request) {
-                    return $user['balance'] <= $request->input('balanceMax');
-                });
-            }
-
-            if ($request->has('currency')) {
-                $currency = $request->input('currency');
-                $combinedData = array_filter($combinedData, function ($user) use ($currency) {
-                    return strcasecmp($user['currency'], $currency) === 0;
-                });
-            }
-            return response()->json(array_values($combinedData), 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'An error occurred'], 500);
         }
     }
 
-    private function getStatusCode($status)
+    private function getCombinedData()
     {
-        switch ($status) {
-            case 'authorised':
-                return 1;
-            case 'decline':
-                return 2;
-            case 'refunded':
-                return 3;
-            default:
-                return null;
+        // The combined data
+        $combinedData = [];
+
+        // Get a list of JSON files in the data directory
+        $jsonFiles = Storage::disk('local')->files('json_data');
+
+        foreach ($jsonFiles as $jsonFile) {
+            $source = pathinfo($jsonFile, PATHINFO_FILENAME);
+
+            $jsonData = $this->standardizeJson($source, json_decode(Storage::disk('local')->get($jsonFile), true));
+
+            foreach ($jsonData as $user) {
+                $user['source'] = $source;
+                $combinedData[] = $user;
+            }
         }
+
+        return $combinedData;
     }
 
     private function standardizeJson($fileName, $data)
@@ -107,5 +79,33 @@ class UserController extends Controller
         $standardizedData = array_map($mapFunction, $data);
 
         return $standardizedData;
+    }
+
+    private function applyFilters(Request $request, array $data)
+    {
+        // Create a filter pipeline
+        $filterPipeline = new FilterPipeline();
+
+        if ($request->has('provider')) {
+            $filterPipeline->addFilter(new ProviderFilter());
+        }
+
+        if ($request->has('statusCode')) {
+            $filterPipeline->addFilter(new StatusCodeFilter());
+        }
+
+        if ($request->has('balanceMin')) {
+            $filterPipeline->addFilter(new BalanceMinFilter());
+        }
+
+        if ($request->has('balanceMax')) {
+            $filterPipeline->addFilter(new BalanceMaxFilter());
+        }
+
+        if ($request->has('currency')) {
+            $filterPipeline->addFilter(new CurrencyFilter());
+        }
+
+        return $filterPipeline->apply($data, $request);
     }
 }
